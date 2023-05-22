@@ -1,5 +1,5 @@
 {
-  "name": "xlstream",
+  "name": "@watershedclimate/xlstream",
   "version": "2.5.7",
   "description": "Turns XLSX into a readable stream.",
   "main": "lib/index",
