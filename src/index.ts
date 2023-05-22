@@ -319,8 +319,9 @@ export async function* getXlsxStreams(options: IXlsxStreamsOptions): AsyncGenera
 
             function processWorkbook() {
                 zip.stream('xl/workbook.xml', (err: any, stream?: ReadStream) => {
-                    if (!stream) {
-                        throw new Error('Received error from node-stream-zip: ' + inspect(err, undefined, 4));
+                    if (!stream || err) {
+                        reject('Received error from node-stream-zip: ' + inspect(err, undefined, 4));
+                        return;
                     }
                     if (options.encoding) {
                         stream.setEncoding(options.encoding);
@@ -340,8 +341,9 @@ export async function* getXlsxStreams(options: IXlsxStreamsOptions): AsyncGenera
 
             function getRels() {
                 zip.stream('xl/_rels/workbook.xml.rels', (err: any, stream?: ReadStream) => {
-                    if (!stream) {
-                        throw new Error('Received error from node-stream-zip: ' + inspect(err, undefined, 4));
+                    if (!stream || err) {
+                        reject('Received error from node-stream-zip: ' + inspect(err, undefined, 4));
+                        return;
                     }
                     if (options.encoding) {
                         stream.setEncoding(options.encoding);
@@ -371,8 +373,9 @@ export async function* getXlsxStreams(options: IXlsxStreamsOptions): AsyncGenera
     function getMergedCellDictionary(sheetFileName: string) {
         return new Promise<IMergedCellDictionary>((resolve, reject) => {
             zip.stream(`xl/worksheets/${sheetFileName}`, (err: any, stream?: ReadStream) => {
-                if (!stream) {
-                    throw new Error('Received error from node-stream-zip: ' + inspect(err, undefined, 4));
+                if (!stream || err) {
+                    reject('Received error from node-stream-zip: ' + inspect(err, undefined, 4));
+                    return;
                 }
                 if (options.encoding) {
                     stream.setEncoding(options.encoding);
@@ -427,8 +430,9 @@ export async function* getXlsxStreams(options: IXlsxStreamsOptions): AsyncGenera
         return new Promise<Transform>((resolve, reject) => {
             const sheetFullFileName = `xl/worksheets/${sheetFileName}`;
             zip.stream(sheetFullFileName, (err: any, stream?: ReadStream) => {
-                if (!stream) {
-                    throw new Error('Received error from node-stream-zip: ' + inspect(err, undefined, 4));
+                if (!stream || err) {
+                    reject('Received error from node-stream-zip: ' + inspect(err, undefined, 4));
+                    return;
                 }
                 if (options.encoding) {
                     stream.setEncoding(options.encoding);
@@ -478,14 +482,12 @@ export function getWorksheets(options: IWorksheetOptions) {
     return new Promise<IWorksheet[]>((resolve, reject) => {
         function processWorkbook() {
             zip.stream('xl/workbook.xml', (err: any, stream?: ReadStream) => {
-                if (!stream) {
-                    throw new Error('Received error from node-stream-zip: ' + inspect(err, undefined, 4));
+                if (!stream || err) {
+                    reject('Received error from node-stream-zip: ' + inspect(err, undefined, 4));
+                    return;
                 }
                 if (options.encoding) {
                     stream.setEncoding(options.encoding);
-                }
-                if (err) {
-                    reject(err);
                 }
                 stream.pipe(saxStream({
                     strict: true,
