@@ -134,6 +134,8 @@ function getTransform(formats: (string | number)[], strings: string[], dict?: IM
                     arr[index] = value;
                     obj[column] = value;
                     if (formatId) {
+                      // Watershed patch: This try/catch block is to prevent unhandled rejection errors when formatting fails.
+                      try {
                         let numFormat = formats[formatId];
                         if (numberFormat && numberFormat === 'excel' && typeof numFormat === 'number' && excelNumberFormat[numFormat]) {
                             numFormat = excelNumberFormat[numFormat];
@@ -146,6 +148,11 @@ function getTransform(formats: (string | number)[], strings: string[], dict?: IM
                             value = ssf.format(numFormat, value);
                         }
                         value = formatNumericValue(type, value);
+                      } catch (err) {
+                        // Formatting errors should not generate unhandled rejection errors.
+                        done(err);
+                        return;
+                      }
                     }
                     if (dict?.[lastReceivedRow]?.[column]) {
                         dict[lastReceivedRow][column].value.formatted = value;
